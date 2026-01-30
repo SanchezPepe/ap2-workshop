@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from google.adk import Agent
 from google.adk.tools import FunctionTool
 
-from solutions.ap2_types_complete import (
+from shared.ap2_types import (
     PaymentMandate,
     PaymentStatus,
     create_ap2_extension,

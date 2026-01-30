@@ -1,31 +1,26 @@
 """
 Shopper Agent - Travel Booking Assistant
 
-This agent acts as a shopper in the AP2 protocol, helping users
-find and book travel arrangements by communicating with merchant agents.
+This agent helps users find and book travel using the AP2 protocol
+for secure payment authorization.
 
-WORKSHOP: You will complete this agent by implementing the tools and agent definition.
+WORKSHOP: Complete the two TODO functions to implement AP2 authorization.
 """
 
 import os
 import sys
 from typing import Any
 
-# Add shared module to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from google.adk import Agent
 from google.adk.tools import FunctionTool
 
-from shared.ap2_types import (
-    PaymentMandate,
-    PaymentStatus,
-    create_ap2_extension,
-)
+from shared.ap2_types import PaymentStatus, create_ap2_extension
 
 
 # ============================================================================
-# User Session & Authorization (Simulated)
+# User Session (Simulated)
 # ============================================================================
 
 USER_SESSION = {
@@ -41,47 +36,38 @@ PENDING_MANDATES: dict[str, dict] = {}
 
 
 # ============================================================================
-# Shopper Tools - IMPLEMENT THESE
+# Pre-built Tools (provided for you)
 # ============================================================================
 
 def get_user_preferences() -> dict[str, Any]:
-    """
-    Get the current user's travel preferences.
-
-    Returns:
-        User preferences and profile information
-    """
-    # TODO 1: Return a dictionary containing:
-    # - user_id (from USER_SESSION)
-    # - name (from USER_SESSION)
-    # - preferences dict with:
-    #   - preferred_class: "economy"
-    #   - preferred_airlines: ["SkyHigh Airlines", "Premium Air"]
-    #   - max_layovers: 1
-    #   - seat_preference: "aisle"
-    # - payment_methods_available: count of payment methods
-
-    # IMPLEMENT HERE:
-    pass
+    """Get the current user's travel preferences."""
+    return {
+        "user_id": USER_SESSION["user_id"],
+        "name": USER_SESSION["name"],
+        "preferences": {
+            "preferred_class": "economy",
+            "preferred_airlines": ["SkyHigh Airlines", "Premium Air"],
+            "max_layovers": 1,
+            "seat_preference": "aisle",
+        },
+        "payment_methods_available": len(USER_SESSION["payment_methods"]),
+    }
 
 
 def get_payment_methods() -> dict[str, Any]:
-    """
-    Get the user's available payment methods.
-
-    Returns:
-        List of payment methods (masked for security)
-    """
-    # TODO 2: Return the user's payment methods
-    # Iterate through USER_SESSION["payment_methods"] and create a list with:
-    # - index (position in list)
-    # - type (card type)
-    # - display (formatted as "{brand} ending in {last_four}")
-    #
-    # Return: {"status": "success", "payment_methods": [...], "default_method": 0}
-
-    # IMPLEMENT HERE:
-    pass
+    """Get the user's available payment methods."""
+    methods = []
+    for i, pm in enumerate(USER_SESSION["payment_methods"]):
+        methods.append({
+            "index": i,
+            "type": pm["type"],
+            "display": f"{pm['brand']} ending in {pm['last_four']}",
+        })
+    return {
+        "status": "success",
+        "payment_methods": methods,
+        "default_method": 0,
+    }
 
 
 def search_merchant_flights(
@@ -90,72 +76,73 @@ def search_merchant_flights(
     date: str | None = None,
     travel_class: str | None = None,
 ) -> dict[str, Any]:
-    """
-    Search for flights via the merchant agent.
+    """Search for flights via the merchant agent."""
+    flights = [
+        {
+            "flight_id": "FL001",
+            "airline": "SkyHigh Airlines",
+            "route": f"{origin} → {destination}",
+            "departure": "2025-03-15 10:00",
+            "arrival": "2025-03-16 06:30",
+            "price": "$850.00",
+            "class": "economy",
+        },
+        {
+            "flight_id": "FL002",
+            "airline": "SkyHigh Airlines",
+            "route": f"{origin} → {destination}",
+            "departure": "2025-03-15 14:30",
+            "arrival": "2025-03-16 10:00",
+            "price": "$920.00",
+            "class": "economy",
+        },
+        {
+            "flight_id": "FL003",
+            "airline": "Premium Air",
+            "route": f"{origin} → {destination}",
+            "departure": "2025-03-15 08:00",
+            "arrival": "2025-03-15 23:30",
+            "price": "$1,450.00",
+            "class": "business",
+        },
+    ]
+    return {
+        "status": "success",
+        "source": "flight_merchant_agent",
+        "search": {"origin": origin, "destination": destination, "date": date},
+        "results": flights,
+        "message": f"Found {len(flights)} flights from {origin} to {destination}",
+    }
 
-    In a full A2A implementation, this would call the remote merchant agent.
-    For this demo, we'll simulate the merchant's response.
 
-    Args:
-        origin: Origin airport code
-        destination: Destination airport code
-        date: Travel date (YYYY-MM-DD)
-        travel_class: Preferred class
-
-    Returns:
-        Flight search results from merchant
-    """
-    # TODO 3: Return simulated flight search results
-    # Create a list of 3 flight options with:
-    # - flight_id (FL001, FL002, FL003)
-    # - airline
-    # - route (formatted as "{origin} → {destination}")
-    # - departure time
-    # - arrival time
-    # - price (as string like "$850.00")
-    # - class
-    #
-    # Return dict with: status, source, search query, results list, message
-
-    # IMPLEMENT HERE:
-    pass
-
-
-def initiate_booking(
-    flight_id: str,
-    passenger_name: str,
-) -> dict[str, Any]:
-    """
-    Initiate a flight booking with the merchant.
-
-    This starts the AP2 payment flow by requesting a payment mandate
-    from the merchant agent.
-
-    Args:
-        flight_id: The flight to book
-        passenger_name: Name for the booking
-
-    Returns:
-        Payment mandate details requiring user authorization
-    """
-    # TODO 4: Simulate the merchant creating a payment mandate
-    #
-    # 1. Generate a mandate_id using: str(uuid.uuid4())[:8]
-    # 2. Return a dict with:
-    #    - status: "mandate_created"
-    #    - message: explaining mandate was created
-    #    - mandate_id: formatted as "MND-{id}"
-    #    - merchant: "flight_merchant_agent"
-    #    - booking_details: {flight_id, passenger}
-    #    - payment: {subtotal, taxes, total, currency}
-    #    - line_items: list of formatted item strings
-    #    - next_step: instruction to use request_user_authorization
-
+def initiate_booking(flight_id: str, passenger_name: str) -> dict[str, Any]:
+    """Initiate a flight booking - merchant creates payment mandate."""
     import uuid
+    mandate_id = str(uuid.uuid4())[:8]
 
-    # IMPLEMENT HERE:
-    pass
+    return {
+        "status": "mandate_created",
+        "message": "Merchant created payment mandate - user authorization required",
+        "mandate_id": f"MND-{mandate_id}",
+        "merchant": "flight_merchant_agent",
+        "booking_details": {"flight_id": flight_id, "passenger": passenger_name},
+        "payment": {
+            "subtotal": "$850.00",
+            "taxes": "$102.00",
+            "total": "$952.00",
+            "currency": "USD",
+        },
+        "line_items": [
+            f"Flight {flight_id}: SFO → CDG - $850.00",
+            "Taxes and fees - $102.00",
+        ],
+        "next_step": "Request user authorization using request_user_authorization tool",
+    }
 
+
+# ============================================================================
+# AP2 AUTHORIZATION - IMPLEMENT THESE TWO FUNCTIONS
+# ============================================================================
 
 def request_user_authorization(
     mandate_id: str,
@@ -165,78 +152,57 @@ def request_user_authorization(
     line_items: list[str],
 ) -> dict[str, Any]:
     """
-    Request user authorization for a payment mandate.
+    TODO 1: Request user authorization for a payment.
 
-    This simulates the AP2 authorization flow where the user must
-    explicitly approve a payment before it can proceed.
+    This is the core of AP2 - showing the user what they're paying for
+    and getting their explicit approval.
 
-    Args:
-        mandate_id: The mandate ID from the merchant
-        merchant_name: Name of the merchant requesting payment
-        amount: Total amount to be charged
-        description: Description of the purchase
-        line_items: List of items being purchased
+    Steps:
+    1. Store the mandate in PENDING_MANDATES with status "pending_user_input"
+    2. Return a response with:
+       - status: "authorization_required"
+       - mandate_id: the mandate ID
+       - prompt_to_user: formatted payment details (see example below)
+       - requires_user_action: True
 
-    Returns:
-        Authorization status and prompt for user
+    Example prompt_to_user format:
+    ========================================
+            AP2 PAYMENT AUTHORIZATION
+    ========================================
+    Merchant: {merchant_name}
+    Amount: {amount}
+
+    Items:
+      - {item1}
+      - {item2}
+
+    Description: {description}
+    ========================================
     """
-    # TODO 5: Implement the authorization request flow
-    #
-    # 1. Store the pending mandate in PENDING_MANDATES dict with:
-    #    - mandate_id, merchant, amount, description, line_items
-    #    - status: "pending_user_input"
-    #
-    # 2. Return a dict with:
-    #    - status: "authorization_required"
-    #    - mandate_id
-    #    - prompt_to_user: A formatted string showing the payment details
-    #    - requires_user_action: True
-    #
-    # The prompt should look like:
-    # ========================================
-    #         AP2 PAYMENT AUTHORIZATION
-    # ========================================
-    # Merchant: {merchant_name}
-    # Amount: {amount}
-    # Items:
-    #   - {item1}
-    #   - {item2}
-    # ========================================
-
     # IMPLEMENT HERE:
     pass
 
 
 def confirm_payment(mandate_id: str, approved: bool = True) -> dict[str, Any]:
     """
-    Confirm or reject a payment authorization.
+    TODO 2: Confirm or reject a payment authorization.
 
-    This simulates the user's response to an authorization request.
+    This generates the cryptographic proof of user intent.
 
-    Args:
-        mandate_id: The mandate to confirm/reject
-        approved: Whether the user approves the payment
+    Steps:
+    1. Check if mandate_id exists in PENDING_MANDATES
+       - If not found, return {"status": "error", "message": "..."}
 
-    Returns:
-        Authorization token if approved, rejection if not
+    2. If not approved:
+       - Set mandate status to "rejected"
+       - Return {"status": "rejected", "message": "...", "mandate_id": ...}
+
+    3. If approved:
+       - Generate token: hashlib.sha256(f"{mandate_id}:{USER_SESSION['user_id']}:{time.time()}".encode()).hexdigest()[:32]
+       - Update mandate status to "authorized"
+       - Store token in mandate
+       - Return {"status": "authorized", "authorization_token": token, ...}
     """
-    # TODO 6: Implement the payment confirmation
-    #
-    # 1. Check if mandate_id exists in PENDING_MANDATES
-    #    - If not, return error status
-    #
-    # 2. If not approved:
-    #    - Update mandate status to "rejected"
-    #    - Return rejection response
-    #
-    # 3. If approved:
-    #    - Generate an authorization token using:
-    #      token_data = f"{mandate_id}:{USER_SESSION['user_id']}:{time.time()}"
-    #      authorization_token = hashlib.sha256(token_data.encode()).hexdigest()[:32]
-    #    - Update mandate status to "authorized"
-    #    - Store the token in the mandate
-    #    - Return success with token
-
     import hashlib
     import time
 
@@ -245,42 +211,44 @@ def confirm_payment(mandate_id: str, approved: bool = True) -> dict[str, Any]:
 
 
 # ============================================================================
-# Create the Shopper Agent - COMPLETE THIS
+# Agent Configuration (provided for you)
 # ============================================================================
 
-# TODO 7: Create FunctionTool instances for each tool
-# Example: get_user_preferences_tool = FunctionTool(func=get_user_preferences)
+# Create tools
+get_user_preferences_tool = FunctionTool(func=get_user_preferences)
+get_payment_methods_tool = FunctionTool(func=get_payment_methods)
+search_merchant_flights_tool = FunctionTool(func=search_merchant_flights)
+initiate_booking_tool = FunctionTool(func=initiate_booking)
+request_user_authorization_tool = FunctionTool(func=request_user_authorization)
+confirm_payment_tool = FunctionTool(func=confirm_payment)
 
-# UNCOMMENT AND COMPLETE:
-# get_user_preferences_tool = FunctionTool(func=get_user_preferences)
-# get_payment_methods_tool = ...
-# search_merchant_flights_tool = ...
-# initiate_booking_tool = ...
-# request_user_authorization_tool = ...
-# confirm_payment_tool = ...
+# Create the agent
+shopper_agent = Agent(
+    model="gemini-2.0-flash",
+    name="travel_shopper_agent",
+    description="A travel booking assistant using AP2 for secure payments",
+    instruction="""You are a travel booking assistant. Help users find and book flights
+    using the AP2 protocol for secure payments.
 
+    Workflow:
+    1. Search for flights with search_merchant_flights
+    2. When user selects a flight, use initiate_booking
+    3. Request authorization with request_user_authorization
+    4. After user confirms, use confirm_payment to generate the auth token
 
-# TODO 8: Create the shopper agent
-# Use Agent() with:
-# - model: "gemini-2.0-flash"
-# - name: "travel_shopper_agent"
-# - description: A helpful description
-# - instruction: Detailed instructions for the agent's behavior
-# - tools: List of all the FunctionTools created above
+    AP2 Principles:
+    - NEVER make payments without explicit user authorization
+    - ALWAYS show payment details before requesting approval
+    - The user is ALWAYS in control
+    """,
+    tools=[
+        get_user_preferences_tool,
+        get_payment_methods_tool,
+        search_merchant_flights_tool,
+        initiate_booking_tool,
+        request_user_authorization_tool,
+        confirm_payment_tool,
+    ],
+)
 
-# UNCOMMENT AND COMPLETE:
-# shopper_agent = Agent(
-#     model="gemini-2.0-flash",
-#     name="travel_shopper_agent",
-#     description="...",
-#     instruction="""...""",
-#     tools=[
-#         # Add your tools here
-#     ],
-# )
-
-# Placeholder until you complete the agent
-shopper_agent = None
-
-# Export the agent
 root_agent = shopper_agent
