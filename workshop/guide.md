@@ -225,7 +225,8 @@ mandate_id → user_id → timestamp → token
 
 ## Next Steps
 
-- Explore `complete_demo/` for a full working example
+- Explore `../demo/` for a full working example
+- Check `solutions/` for reference implementations
 - Read `ap2-protocol.md` for protocol details
 - Try `adk web shopper_agent` for interactive mode
 
