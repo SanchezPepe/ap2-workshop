@@ -1,0 +1,44 @@
+{
+  "name": "Travel Shopper Agent",
+  "description": "A travel booking assistant that helps users find and book flights using AP2 for secure payments",
+  "url": "http://localhost:8001/a2a/travel_shopper_agent",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false,
+    "extensions": [
+      {
+        "uri": "https://github.com/google-agentic-commerce/ap2/tree/v0.1",
+        "description": "This agent can make payments on behalf of users via the AP2 protocol",
+        "params": {
+          "roles": ["shopper"]
+        }
+      }
+    ]
+  },
+  "defaultInputModes": ["text/plain"],
+  "defaultOutputModes": ["text/plain", "application/json"],
+  "skills": [
+    {
+      "id": "search_flights",
+      "name": "Search Flights",
+      "description": "Search for available flights from merchant agents",
+      "tags": ["search", "flights", "travel"]
+    },
+    {
+      "id": "book_flight",
+      "name": "Book Flight",
+      "description": "Book a flight with secure AP2 payment authorization",
+      "tags": ["booking", "payment", "ap2"]
+    },
+    {
+      "id": "manage_preferences",
+      "name": "Manage Preferences",
+      "description": "View and manage user travel preferences",
+      "tags": ["preferences", "profile"]
+    }
+  ],
+  "authentication": {
+    "schemes": ["none"]
+  }
+}

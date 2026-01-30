@@ -1,0 +1,45 @@
+{
+  "name": "Flight Booking Merchant",
+  "description": "A merchant agent that sells airline tickets and accepts payments via AP2 protocol",
+  "url": "http://localhost:8002/a2a/flight_merchant_agent",
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false,
+    "extensions": [
+      {
+        "uri": "https://github.com/google-agentic-commerce/ap2/tree/v0.1",
+        "description": "This merchant accepts payments via the AP2 protocol",
+        "required": true,
+        "params": {
+          "roles": ["merchant"]
+        }
+      }
+    ]
+  },
+  "defaultInputModes": ["text/plain", "application/json"],
+  "defaultOutputModes": ["text/plain", "application/json"],
+  "skills": [
+    {
+      "id": "search_flights",
+      "name": "Search Flights",
+      "description": "Search for available flights based on origin, destination, date, and preferences",
+      "tags": ["search", "flights", "travel"]
+    },
+    {
+      "id": "get_flight_details",
+      "name": "Get Flight Details",
+      "description": "Get detailed information about a specific flight including policies",
+      "tags": ["details", "flights", "info"]
+    },
+    {
+      "id": "book_flight",
+      "name": "Book Flight",
+      "description": "Create a booking and payment mandate for a flight (requires AP2 authorization)",
+      "tags": ["booking", "payment", "ap2"]
+    }
+  ],
+  "authentication": {
+    "schemes": ["none"]
+  }
+}
